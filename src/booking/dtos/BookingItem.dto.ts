@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 
 export class BookingItemDto {
-  constructor(partial: Partial<BookingItemDto>) {
+  constructor(partial: any) {
     Object.assign(this, partial);
   }
   readonly id: number;
@@ -11,12 +11,13 @@ export class BookingItemDto {
   price_per_night: number;
   has_wifi: boolean;
   has_balcony: boolean;
-  booked_from: string;
-  booked_to: string;
+  booked_from: Date | null;
+  booked_to: Date | null;
 
   @Exclude()
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  @Exclude()
+  updatedAt: Date;
 
   @Exclude()
   OrderBookingModel: Record<string, number>;

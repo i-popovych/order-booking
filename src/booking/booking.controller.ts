@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BookingService } from 'src/booking/booking.service';
+import { BookingItemDto } from 'src/booking/dtos/BookingItem.dto';
 import { CreateBookingDto } from 'src/booking/dtos/CreateBooking.dto';
 import { UpdateBookingDto } from 'src/booking/dtos/UpdateBooking.dto';
 import { BookingModel } from 'src/booking/models/booking.model';
@@ -22,11 +23,14 @@ export class BookingController {
   @Get()
   @ApiResponse({
     status: 200,
-    type: [BookingModel],
+    type: [BookingItemDto],
     description: 'Get all bookings',
   })
-  getAllBookings() {
-    return this.bookingService.getAllBookings();
+  async getAllBookings(): Promise<BookingItemDto[]> {
+    const result = await this.bookingService.getAllBookings();
+    return result.map(
+      (bookingItem) => new BookingItemDto(bookingItem.dataValues),
+    );
   }
 
   @Get(':id')
@@ -36,8 +40,9 @@ export class BookingController {
     type: BookingModel,
     description: 'Get booking by ID',
   })
-  getBookingById(@Param('id') id: number) {
-    return this.bookingService.getBookingById(id);
+  async getBookingById(@Param('id') id: number) {
+    const model = await this.bookingService.getBookingById(id);
+    return new BookingItemDto(model.dataValues);
   }
 
   @Post()
@@ -47,8 +52,10 @@ export class BookingController {
     type: BookingModel,
     description: 'Booking created successfully',
   })
-  createBooking(@Body() dto: CreateBookingDto) {
-    return this.bookingService.createBooking(dto);
+  async createBooking(@Body() dto: CreateBookingDto) {
+    return new BookingItemDto(
+      (await this.bookingService.createBooking(dto)).dataValues,
+    );
   }
 
   @Put(':id')
@@ -62,14 +69,16 @@ export class BookingController {
     type: BookingModel,
     description: 'Booking updated successfully',
   })
-  updateBooking(@Param('id') id: number, @Body() dto: UpdateBookingDto) {
+  async updateBooking(@Param('id') id: number, @Body() dto: UpdateBookingDto) {
     if (!Object.keys(dto).length) {
       throw new BadRequestException(
         'Data must be provided to update the booking',
       );
     }
 
-    return this.bookingService.updateBooking(id, dto);
+    const model = await this.bookingService.updateBooking(id, dto);
+
+    return new BookingItemDto(model.dataValues);
   }
 
   @Delete(':id')
