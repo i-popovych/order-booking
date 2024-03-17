@@ -78,23 +78,48 @@ export class OrderService {
       throw new NotFoundException('No order found');
     }
 
-    order.start_date = start_date;
-    order.end_date = end_date;
-
-    if (booking_ids) {
+    if (!booking_ids || !booking_ids.length) {
+      order.start_date = start_date;
+      order.end_date = end_date;
       await order.save();
-      return;
+
+      return order;
     }
 
-    await this.orderBookingRepository.destroy({ where: { order_id: id } });
+    try {
+      await this.sequelize.transaction(async () => {
+        await this.orderBookingRepository.destroy({
+          where: { order_id: id },
+        });
 
-    await order.save();
+        for (const bookingId of booking_ids) {
+          const isAvailable = await this.bookingService.isAvailable(
+            bookingId,
+            start_date,
+            end_date,
+          );
 
-    for (const booking of order.bookings) {
-      await this.orderBookingRepository.create({
-        booking_id: booking.id,
-        order_id: id,
+          if (!isAvailable) {
+            throw new Error(`Booking with id ${bookingId} not available`);
+          }
+
+          await this.orderBookingRepository.create({
+            booking_id: bookingId,
+            order_id: id,
+          });
+        }
+
+        order.start_date = start_date;
+        order.end_date = end_date;
+        await order.save();
+
+        return order;
       });
+    } catch (error) {
+      throw new HttpException(
+        'Error creating order: ' + error.message,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

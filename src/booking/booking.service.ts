@@ -51,7 +51,7 @@ export class BookingService {
     });
 
     if (!booking) {
-      return true;
+      return false;
     }
 
     let isOverlapping = false;
