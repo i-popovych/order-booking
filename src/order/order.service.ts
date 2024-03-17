@@ -57,6 +57,8 @@ export class OrderService {
         order_id: order.id,
       });
     }
+
+    return order;
   }
 
   async update(id: number, dto: UpdateOrderDto) {
