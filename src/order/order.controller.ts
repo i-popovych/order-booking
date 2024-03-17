@@ -7,7 +7,15 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateOrderDto } from 'src/order/dtos/CreateOrder.dto';
 import { OrderItemDto } from 'src/order/dtos/OrderItem.dto';
 import { UpdateOrderDto } from 'src/order/dtos/UpdateOrder.dto';
@@ -26,6 +34,10 @@ export class OrderController {
     type: OrderModel,
     description: 'Order created successfully',
   })
+  @ApiForbiddenResponse({
+    description: 'Product with id 1 is not avaliable for rent',
+  })
+  @ApiBadRequestResponse({ description: 'Validation error' })
   async create(@Body() dto: CreateOrderDto) {
     const model = await this.orderService.create(dto);
     return model.dataValues;
@@ -47,6 +59,10 @@ export class OrderController {
     type: OrderModel,
     description: 'Order updated successfully',
   })
+  @ApiForbiddenResponse({
+    description: 'Product with id 1 is not avaliable for rent',
+  })
+  @ApiBadRequestResponse({ description: 'Validation error' })
   async update(@Param('id') id: number, @Body() dto: UpdateOrderDto) {
     const order = await this.orderService.update(id, dto);
     return order.dataValues;
@@ -55,7 +71,7 @@ export class OrderController {
   @Get()
   @ApiResponse({
     status: 200,
-    type: Array<OrderItemDto>,
+    type: [OrderItemDto],
     description: 'Get all orders',
   })
   async getAll(): Promise<OrderItemDto[]> {
@@ -70,6 +86,7 @@ export class OrderController {
     type: OrderItemDto,
     description: 'Get order by ID',
   })
+  @ApiNotFoundResponse({ description: 'Order not found' })
   async getOne(@Param('id') id: number): Promise<OrderItemDto> {
     return new OrderItemDto(await this.orderService.getOne(id));
   }

@@ -78,7 +78,7 @@ export class OrderService {
     } catch (error) {
       throw new HttpException(
         'Error creating order: ' + error.message,
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.FORBIDDEN,
       );
     }
   }

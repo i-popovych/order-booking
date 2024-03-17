@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { SequelizeModule } from '@nestjs/sequelize';
+import { AppController } from 'src/app.controller';
 
 import { BookingModule } from 'src/booking/booking.module';
 import { BookingModel } from 'src/booking/models/booking.model';
@@ -29,6 +30,7 @@ import { OrderModule } from 'src/order/order.module';
     OrderModule,
     BookingModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

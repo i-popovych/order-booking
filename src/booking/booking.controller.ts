@@ -8,7 +8,13 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiNotFoundResponse,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { BookingService } from 'src/booking/booking.service';
 import { BookingItemDto } from 'src/booking/dtos/BookingItem.dto';
 import { CreateBookingDto } from 'src/booking/dtos/CreateBooking.dto';
@@ -40,6 +46,7 @@ export class BookingController {
     type: BookingModel,
     description: 'Get booking by ID',
   })
+  @ApiNotFoundResponse({ description: 'Booking not found' })
   async getBookingById(@Param('id') id: number) {
     const model = await this.bookingService.getBookingById(id);
     return new BookingItemDto(model.dataValues);

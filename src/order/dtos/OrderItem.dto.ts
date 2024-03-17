@@ -36,7 +36,7 @@ export class OrderItemDto {
   readonly end_date: Date;
   @ApiProperty({
     description: 'Booking items that are associated with the order',
-    type: Array<BookingItemDto>,
+    type: [BookingItemDto],
   })
   bookings: BookingItemDto[];
 }
