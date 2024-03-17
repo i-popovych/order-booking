@@ -12,7 +12,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Order Management')
-    .setVersion('1.0')
+    .setVersion('3.1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
