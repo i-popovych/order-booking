@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, IsDate, IsNumber } from 'class-validator';
 import { DateRange } from 'src/common/validation/range.date.validator';
+import { TransformDate } from 'src/common/validation/transform-date.validator';
 
 export class CreateOrderDto {
   @ApiProperty({
@@ -18,11 +18,9 @@ export class CreateOrderDto {
     example: '2024-03-20T00:00:00Z',
     type: Date,
   })
-  @Transform(({ value }) => {
-    return new Date(value);
-  })
-  @IsDate()
   @DateRange()
+  @IsDate()
+  @TransformDate()
   readonly start_date: Date;
 
   @ApiProperty({
@@ -30,9 +28,7 @@ export class CreateOrderDto {
     example: '2024-03-20T00:00:00Z',
     type: Date,
   })
-  @Transform(({ value }) => {
-    return new Date(value);
-  })
   @IsDate()
+  @TransformDate()
   readonly end_date: Date;
 }

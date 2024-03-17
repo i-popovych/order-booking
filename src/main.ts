@@ -7,7 +7,9 @@ import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
 
-  app.useGlobalPipes(new CustomValidationPipe());
+  app.useGlobalPipes(
+    new CustomValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const config = new DocumentBuilder()

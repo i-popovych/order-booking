@@ -13,6 +13,7 @@ export class CustomValidationPipe implements PipeTransform<any> {
     if (!metadata.metatype || !this.toValidate(metadata.metatype)) {
       return value;
     }
+
     const obj = plainToClass(metadata.metatype, value);
     const errors = await validate(obj, this.options);
 
@@ -22,11 +23,11 @@ export class CustomValidationPipe implements PipeTransform<any> {
       });
       throw new ValidationException(messages);
     }
-    return value;
+    return obj;
   }
 
   private toValidate(metatype: any): boolean {
-    const types: Array<any> = [String, Boolean, Number, Array, Object];
+    const types: Array<any> = [String, Boolean, Number, Array, Object, Date];
     return !types.includes(metatype);
   }
 }
