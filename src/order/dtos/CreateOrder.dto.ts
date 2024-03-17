@@ -1,15 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsDate, IsString } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsDate, IsNumber } from 'class-validator';
 import { DateRange } from 'src/common/validation/range.date.validator';
 
 export class CreateOrderDto {
   @ApiProperty({
-    description: 'The id of the booking product',
-    example: '101a',
+    description: 'The IDs of the booking product',
+    example: [1, 2],
   })
-  @IsString()
-  readonly booking_id: string;
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsNumber({}, { each: true })
+  readonly booking_ids: string[];
 
   @ApiProperty({
     description: 'Start rent date',

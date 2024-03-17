@@ -1,6 +1,12 @@
-import { IsString, IsBoolean, IsDate, IsNumber } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import {
+  IsBoolean,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateBookingDto {
   @ApiProperty({
@@ -38,25 +44,27 @@ export class CreateBookingDto {
   @IsBoolean()
   readonly has_balcony: boolean;
 
-  @ApiProperty({
-    description: 'Available from date',
+  @ApiPropertyOptional({
+    description: 'Booked from date',
     example: '2024-03-15T00:00:00Z',
     type: Date,
   })
+  @IsOptional()
   @Transform(({ value }) => {
     return new Date(value);
   })
   @IsDate()
-  readonly available_from: Date;
+  readonly booked_from: Date;
 
-  @ApiProperty({
-    description: 'Available to date',
+  @ApiPropertyOptional({
+    description: 'Booked to date',
     example: '2024-03-20T00:00:00Z',
     type: Date,
   })
+  @IsOptional()
   @Transform(({ value }) => {
     return new Date(value);
   })
   @IsDate()
-  readonly available_to: Date;
+  readonly booked_to: Date;
 }

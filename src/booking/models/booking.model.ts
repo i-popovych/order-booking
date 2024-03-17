@@ -18,8 +18,8 @@ interface BookingCreatingAttrs {
   price_per_night: number;
   has_wifi: boolean;
   has_balcony: boolean;
-  available_from: Date;
-  available_to: Date;
+  booked_from?: Date;
+  booked_to?: Date;
 }
 
 @Table({ tableName: 'booking' })
@@ -53,17 +53,17 @@ export class BookingModel extends Model<BookingModel, BookingCreatingAttrs> {
 
   @ApiProperty({
     example: '2024-03-15T00:00:00Z',
-    description: 'Available from date',
+    description: 'Booked from date',
   })
-  @Column({ type: DataType.DATE })
-  available_from: Date;
+  @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
+  booked_from: Date | null;
 
   @ApiProperty({
     example: '2024-03-20T00:00:00Z',
-    description: 'Available to date',
+    description: 'Booked to date',
   })
-  @Column({ type: DataType.DATE })
-  available_to: Date;
+  @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
+  booked_to: Date | null;
 
   @ApiProperty({
     example: '2024-03-20T00:00:00Z',

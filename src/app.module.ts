@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { SequelizeModule } from '@nestjs/sequelize';
+
 import { BookingModule } from 'src/booking/booking.module';
 import { BookingModel } from 'src/booking/models/booking.model';
 import { OrderBookingModel } from 'src/order/models/order-booking.model';
