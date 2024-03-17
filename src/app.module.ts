@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { SequelizeModule } from '@nestjs/sequelize';
 
 import { BookingModule } from 'src/booking/booking.module';
 import { BookingModel } from 'src/booking/models/booking.model';
+import { LoggingMiddleware } from 'src/common/middleware/logging.middleware';
 import { OrderBookingModel } from 'src/order/models/order-booking.model';
 import { OrderModel } from 'src/order/models/order.model';
 import { OrderModule } from 'src/order/order.module';
@@ -29,4 +30,8 @@ import { OrderModule } from 'src/order/order.module';
     BookingModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}
