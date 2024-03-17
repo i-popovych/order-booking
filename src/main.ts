@@ -1,14 +1,13 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor } from '@nestjs/common';
+import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
 
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
-  );
+  app.useGlobalPipes(new CustomValidationPipe());
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const config = new DocumentBuilder()
