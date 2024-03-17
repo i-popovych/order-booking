@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateBookingDto } from 'src/booking/dtos/CreateBooking.dto';
 import { UpdateBookingDto } from 'src/booking/dtos/UpdateBooking.dto';
@@ -7,6 +7,8 @@ import { OrderModel } from 'src/order/models/order.model';
 
 @Injectable()
 export class BookingService {
+  private readonly logger = new Logger(BookingService.name);
+
   constructor(
     @InjectModel(BookingModel)
     private readonly bookingRepository: typeof BookingModel,
@@ -46,6 +48,9 @@ export class BookingService {
     start_date: Date,
     end_date: Date,
   ): Promise<boolean> {
+    this.logger.log(
+      `Checking availability for booking with id ${id} state_date: ${start_date} end_date: ${end_date}`,
+    );
     const booking = await this.bookingRepository.findByPk(id, {
       include: [OrderModel],
     });

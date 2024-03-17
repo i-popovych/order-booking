@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
@@ -21,6 +22,8 @@ Sequelize.useCLS(namespace);
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name);
+
   constructor(
     private readonly bookingService: BookingService,
     @InjectModel(OrderModel)
@@ -51,6 +54,8 @@ export class OrderService {
         booking_id: bookingId,
         order_id: orderId,
       });
+
+      this.logger.log(`Booking ${bookingId} added to order ${orderId}`);
     }
   }
 
@@ -72,10 +77,13 @@ export class OrderService {
           start_date,
           end_date,
         );
+
+        this.logger.log(`Order created with id ${order.id}`);
       });
 
       return order;
     } catch (error) {
+      this.logger.error(`Error creating order: ${error.message}`);
       throw new HttpException(
         'Error creating order: ' + error.message,
         HttpStatus.FORBIDDEN,
@@ -97,6 +105,7 @@ export class OrderService {
       order.end_date = end_date;
       await order.save();
 
+      this.logger.log(`Order updated with id ${order.id}`);
       return order;
     }
 
@@ -111,8 +120,11 @@ export class OrderService {
         order.start_date = start_date;
         order.end_date = end_date;
         await order.save();
+
+        this.logger.log(`Order updated with id ${order.id}`);
       });
     } catch (error) {
+      this.logger.error(`Error updating order: ${error.message}`);
       throw new HttpException(
         'Error creating order: ' + error.message,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -134,6 +146,8 @@ export class OrderService {
     order.cancelDate = new Date();
 
     await order.save();
+
+    this.logger.log(`Order cancelled with id ${order.id}`);
   }
 
   async getOne(id: number, isRaw = true) {
@@ -159,12 +173,14 @@ export class OrderService {
       throw new NotFoundException('No order found');
     }
 
+    this.logger.log('All orders fetched');
     return orders.map((order) => order.get({ plain: true }));
   }
 
   async deleteById(id: number) {
     const deletedId = await this.orderRepository.destroy({ where: { id } });
 
+    this.logger.log(`Order deleted with id ${id}`);
     return { id: deletedId };
   }
 }

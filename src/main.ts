@@ -5,7 +5,10 @@ import { ClassSerializerInterceptor } from '@nestjs/common';
 import { CustomValidationPipe } from 'src/common/pipes/validation.pipe';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+    logger: ['error', 'warn', 'log'],
+  });
 
   app.useGlobalPipes(
     new CustomValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
