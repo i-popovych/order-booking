@@ -1,25 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { BookingItemDto } from 'src/booking/dtos/BookingItem.dto';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 export class OrderItemDto {
-  @ApiProperty({
-    description: 'Sum of all booking items of orders in dollars',
-    example: 120,
-  })
-  price: number;
-
-  constructor(values: Partial<Omit<OrderItemDto, 'bookings'>>) {
+  constructor(values: Partial<OrderItemDto>) {
     Object.assign(this, values);
-
-    if (this.bookings.length) {
-      this.price = this.bookings.reduce(
-        (acc, item) => (acc += Number(item.price_per_night)),
-        0,
-      );
-    }
-
-    this.bookings = this.bookings.map((booking) => new BookingItemDto(booking));
   }
+
+  @ApiProperty({
+    description: 'The unique identifier of the order',
+    example: 1,
+  })
+  readonly id: number;
 
   @ApiProperty({
     description: 'Start rent date',
@@ -34,9 +25,12 @@ export class OrderItemDto {
     type: Date,
   })
   readonly end_date: Date;
-  @ApiProperty({
-    description: 'Booking items that are associated with the order',
-    type: [BookingItemDto],
-  })
-  bookings: BookingItemDto[];
+
+  @ApiHideProperty()
+  @Exclude()
+  createdAt: Date;
+
+  @ApiHideProperty()
+  @Exclude()
+  updatedAt: Date;
 }

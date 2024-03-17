@@ -15,7 +15,7 @@ export class CreateOrderDto {
 
   @ApiProperty({
     description: 'Start rent date',
-    example: '2024-03-20T00:00:00Z',
+    example: '2024-03-19T00:00:00Z',
     type: Date,
   })
   @DateRange()

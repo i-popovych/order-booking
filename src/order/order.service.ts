@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -25,12 +26,12 @@ export class OrderService {
   private readonly logger = new Logger(OrderService.name);
 
   constructor(
+    private sequelize: Sequelize,
     private readonly bookingService: BookingService,
     @InjectModel(OrderModel)
     private readonly orderRepository: typeof OrderModel,
     @InjectModel(OrderBookingModel)
     private readonly orderBookingRepository: typeof OrderBookingModel,
-    private sequelize: Sequelize,
   ) {}
 
   private async addBookingToOrder(
@@ -47,7 +48,9 @@ export class OrderService {
       );
 
       if (!isAvailable) {
-        throw new Error(`Booking with id ${bookingId} not available`);
+        throw new ForbiddenException(
+          `Booking with id ${bookingId} not available`,
+        );
       }
 
       await this.orderBookingRepository.create({
@@ -84,9 +87,13 @@ export class OrderService {
       return order;
     } catch (error) {
       this.logger.error(`Error creating order: ${error.message}`);
+
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
       throw new HttpException(
         'Error creating order: ' + error.message,
-        HttpStatus.FORBIDDEN,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -117,25 +124,28 @@ export class OrderService {
 
         await this.addBookingToOrder(booking_ids, id, start_date, end_date);
 
-        order.start_date = start_date;
-        order.end_date = end_date;
-        await order.save();
-
         this.logger.log(`Order updated with id ${order.id}`);
       });
     } catch (error) {
       this.logger.error(`Error updating order: ${error.message}`);
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+
       throw new HttpException(
         'Error creating order: ' + error.message,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
+    order.start_date = start_date;
+    order.end_date = end_date;
+    await order.save();
     return order;
   }
 
   async cancelOne(id: number) {
-    const order = await this.getOne(id, false);
+    const order = await this.getOneWithBooking(id, false);
 
     if (!order) {
       throw new NotFoundException('No order found');
@@ -150,11 +160,21 @@ export class OrderService {
     this.logger.log(`Order cancelled with id ${order.id}`);
   }
 
-  async getOne(id: number, isRaw = true) {
+  async getOneWithBooking(id: number, isRaw = true) {
     const order = await this.orderRepository.findByPk(id, {
       include: [BookingModel],
       nest: isRaw,
     });
+
+    if (!order) {
+      throw new NotFoundException('No order found');
+    }
+
+    return isRaw ? order.get({ plain: true }) : order;
+  }
+
+  async getOne(id: number, isRaw = true) {
+    const order = await this.orderRepository.findByPk(id);
 
     if (!order) {
       throw new NotFoundException('No order found');

@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class BookingItemDto {
   constructor(partial: Partial<BookingItemDto>) {
@@ -24,12 +24,15 @@ export class BookingItemDto {
   @ApiProperty({ description: 'Flag indicating if the room has a balcony' })
   has_balcony: boolean;
 
+  @ApiHideProperty()
   @Exclude()
   createdAt: Date;
 
+  @ApiHideProperty()
   @Exclude()
   updatedAt: Date;
 
+  @ApiHideProperty()
   @Exclude()
   OrderBookingModel: Record<string, number>;
 }
