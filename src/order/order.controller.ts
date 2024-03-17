@@ -23,12 +23,12 @@ export class OrderController {
   @ApiBody({ type: CreateOrderDto, description: 'Create a new order' })
   @ApiResponse({
     status: 201,
-    type: OrderItemDto,
+    type: OrderModel,
     description: 'Order created successfully',
   })
   async create(@Body() dto: CreateOrderDto) {
     const model = await this.orderService.create(dto);
-    return new OrderItemDto(model);
+    return model.dataValues;
   }
 
   @Put(':id/cancel')

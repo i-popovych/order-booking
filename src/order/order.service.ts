@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Sequelize } from 'sequelize-typescript';
 
 import { BookingService } from 'src/booking/booking.service';
 import { BookingModel } from 'src/booking/models/booking.model';
@@ -12,6 +13,11 @@ import { CreateOrderDto } from 'src/order/dtos/CreateOrder.dto';
 import { UpdateOrderDto } from 'src/order/dtos/UpdateOrder.dto';
 import { OrderBookingModel } from 'src/order/models/order-booking.model';
 import { OrderModel } from 'src/order/models/order.model';
+
+import { createNamespace } from 'cls-hooked';
+
+const namespace = createNamespace('sequelize-transaction');
+Sequelize.useCLS(namespace);
 
 @Injectable()
 export class OrderService {
@@ -21,44 +27,51 @@ export class OrderService {
     private readonly orderRepository: typeof OrderModel,
     @InjectModel(OrderBookingModel)
     private readonly orderBookingRepository: typeof OrderBookingModel,
+    private sequelize: Sequelize,
   ) {}
 
   async create(dto: CreateOrderDto) {
     const { booking_ids, start_date, end_date } = dto;
 
-    for (const bookingId of booking_ids) {
-      const isAvailable = await this.bookingService.isAvailable(
-        bookingId,
-        start_date,
-        end_date,
+    try {
+      let order: OrderModel;
+
+      await this.sequelize.transaction(async () => {
+        order = await this.orderRepository.create({
+          start_date,
+          end_date,
+        });
+
+        for (const bookingId of booking_ids) {
+          const isAvailable = await this.bookingService.isAvailable(
+            bookingId,
+            start_date,
+            end_date,
+          );
+
+          if (!isAvailable) {
+            throw new Error(`Booking with id ${bookingId} not available`);
+          }
+
+          await this.bookingService.updateBooking(bookingId, {
+            booked_from: start_date,
+            booked_to: end_date,
+          });
+
+          await this.orderBookingRepository.create({
+            booking_id: bookingId,
+            order_id: order.id,
+          });
+        }
+      });
+
+      return order;
+    } catch (error) {
+      throw new HttpException(
+        'Error creating order: ' + error.message,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
-
-      if (!isAvailable) {
-        throw new HttpException(
-          `Product with ${bookingId} is not available`,
-          HttpStatus.GONE,
-        );
-      }
     }
-
-    const order = await this.orderRepository.create({
-      start_date,
-      end_date,
-    });
-
-    for (const bookingId of booking_ids) {
-      await this.bookingService.updateBooking(bookingId, {
-        booked_from: start_date,
-        booked_to: end_date,
-      });
-
-      await this.orderBookingRepository.create({
-        booking_id: bookingId,
-        order_id: order.id,
-      });
-    }
-
-    return order;
   }
 
   async update(id: number, dto: UpdateOrderDto) {
