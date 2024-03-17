@@ -30,6 +30,30 @@ export class OrderService {
     private sequelize: Sequelize,
   ) {}
 
+  private async addBookingToOrder(
+    bookingIds: Array<number>,
+    orderId: number,
+    start_date: Date,
+    end_date: Date,
+  ) {
+    for (const bookingId of bookingIds) {
+      const isAvailable = await this.bookingService.isAvailable(
+        bookingId,
+        start_date,
+        end_date,
+      );
+
+      if (!isAvailable) {
+        throw new Error(`Booking with id ${bookingId} not available`);
+      }
+
+      await this.orderBookingRepository.create({
+        booking_id: bookingId,
+        order_id: orderId,
+      });
+    }
+  }
+
   async create(dto: CreateOrderDto) {
     const { booking_ids, start_date, end_date } = dto;
 
@@ -42,22 +66,12 @@ export class OrderService {
           end_date,
         });
 
-        for (const bookingId of booking_ids) {
-          const isAvailable = await this.bookingService.isAvailable(
-            bookingId,
-            start_date,
-            end_date,
-          );
-
-          if (!isAvailable) {
-            throw new Error(`Booking with id ${bookingId} not available`);
-          }
-
-          await this.orderBookingRepository.create({
-            booking_id: bookingId,
-            order_id: order.id,
-          });
-        }
+        await this.addBookingToOrder(
+          booking_ids,
+          order.id,
+          start_date,
+          end_date,
+        );
       });
 
       return order;
@@ -92,28 +106,11 @@ export class OrderService {
           where: { order_id: id },
         });
 
-        for (const bookingId of booking_ids) {
-          const isAvailable = await this.bookingService.isAvailable(
-            bookingId,
-            start_date,
-            end_date,
-          );
-
-          if (!isAvailable) {
-            throw new Error(`Booking with id ${bookingId} not available`);
-          }
-
-          await this.orderBookingRepository.create({
-            booking_id: bookingId,
-            order_id: id,
-          });
-        }
+        await this.addBookingToOrder(booking_ids, id, start_date, end_date);
 
         order.start_date = start_date;
         order.end_date = end_date;
         await order.save();
-
-        return order;
       });
     } catch (error) {
       throw new HttpException(
@@ -121,6 +118,8 @@ export class OrderService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+
+    return order;
   }
 
   async cancelOne(id: number) {

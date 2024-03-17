@@ -48,7 +48,8 @@ export class OrderController {
     description: 'Order updated successfully',
   })
   async update(@Param('id') id: number, @Body() dto: UpdateOrderDto) {
-    return this.orderService.update(id, dto);
+    const order = await this.orderService.update(id, dto);
+    return order.dataValues;
   }
 
   @Get()
