@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from 'src/order/dtos/CreateOrder.dto';
 import { OrderItemDto } from 'src/order/dtos/OrderItem.dto';
@@ -41,5 +41,15 @@ export class OrderController {
   })
   async getOne(@Param('id') id: number): Promise<OrderItemDto> {
     return new OrderItemDto(await this.orderService.getOne(id));
+  }
+
+  @Delete(':id')
+  @ApiParam({ name: 'id', type: 'number' })
+  @ApiResponse({
+    status: 200,
+    description: 'Delete order by ID',
+  })
+  async deleteOne(@Param('id') id: number) {
+    return this.orderService.deleteById(id);
   }
 }

@@ -93,4 +93,10 @@ export class OrderService {
 
     return orders.map((order) => order.get({ plain: true }));
   }
+
+  async deleteById(id: number) {
+    const deletedId = await this.orderRepository.destroy({ where: { id } });
+
+    return { id: deletedId };
+  }
 }
