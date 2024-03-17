@@ -53,11 +53,6 @@ export class OrderService {
             throw new Error(`Booking with id ${bookingId} not available`);
           }
 
-          await this.bookingService.updateBooking(bookingId, {
-            booked_from: start_date,
-            booked_to: end_date,
-          });
-
           await this.orderBookingRepository.create({
             booking_id: bookingId,
             order_id: order.id,
@@ -96,11 +91,6 @@ export class OrderService {
     await order.save();
 
     for (const booking of order.bookings) {
-      await this.bookingService.updateBooking(booking.id, {
-        booked_from: start_date,
-        booked_to: end_date,
-      });
-
       await this.orderBookingRepository.create({
         booking_id: booking.id,
         order_id: id,
@@ -113,13 +103,6 @@ export class OrderService {
 
     if (!order) {
       throw new NotFoundException('No order found');
-    }
-
-    for (const booking of order.bookings) {
-      await this.bookingService.updateBooking(booking.id, {
-        booked_from: null,
-        booked_to: null,
-      });
     }
 
     await this.orderBookingRepository.destroy({ where: { order_id: id } });

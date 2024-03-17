@@ -51,24 +51,6 @@ export class BookingModel extends Model<BookingModel, BookingCreatingAttrs> {
   @Column({ type: DataType.BOOLEAN })
   has_balcony: boolean;
 
-  @ApiProperty({
-    example: '2024-03-15T00:00:00Z',
-    description: 'Booked from date',
-  })
-  @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
-  booked_from: Date | null;
-
-  @ApiProperty({
-    example: '2024-03-20T00:00:00Z',
-    description: 'Booked to date',
-  })
-  @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
-  booked_to: Date | null;
-
-  @ApiProperty({
-    example: '2024-03-20T00:00:00Z',
-    description: 'Created at date',
-  })
   @CreatedAt
   createdAt: Date;
 

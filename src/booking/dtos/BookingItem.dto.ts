@@ -24,15 +24,6 @@ export class BookingItemDto {
   @ApiProperty({ description: 'Flag indicating if the room has a balcony' })
   has_balcony: boolean;
 
-  @ApiProperty({
-    description: 'The start date of the booking item',
-    type: Date,
-  })
-  booked_from: Date | null;
-
-  @ApiProperty({ description: 'The end date of the booking item', type: Date })
-  booked_to: Date | null;
-
   @Exclude()
   createdAt: Date;
 

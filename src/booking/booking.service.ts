@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { CreateBookingDto } from 'src/booking/dtos/CreateBooking.dto';
 import { UpdateBookingDto } from 'src/booking/dtos/UpdateBooking.dto';
 import { BookingModel } from 'src/booking/models/booking.model';
+import { OrderModel } from 'src/order/models/order.model';
 
 @Injectable()
 export class BookingService {
@@ -45,15 +46,25 @@ export class BookingService {
     start_date: Date,
     end_date: Date,
   ): Promise<boolean> {
-    const booking = await this.bookingRepository.findByPk(id);
+    const booking = await this.bookingRepository.findByPk(id, {
+      include: [OrderModel],
+    });
 
     if (!booking) {
       return true;
     }
 
-    const isOverlapping =
-      (start_date <= booking.booked_to && start_date >= booking.booked_from) ||
-      (end_date >= booking.booked_from && end_date <= booking.booked_to);
+    let isOverlapping = false;
+
+    if (!booking.orders.length) {
+      return true;
+    }
+
+    for (const order of booking.orders) {
+      isOverlapping =
+        (start_date <= order.start_date && start_date >= order.end_date) ||
+        (end_date >= order.start_date && end_date <= order.end_date);
+    }
 
     return !isOverlapping;
   }
