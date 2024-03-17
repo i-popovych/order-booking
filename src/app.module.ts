@@ -23,6 +23,7 @@ import { OrderModule } from 'src/order/order.module';
       database: process.env.DB_NAME,
       models: [OrderBookingModel, OrderModel, BookingModel],
       autoLoadModels: true,
+      synchronize: true,
     }),
     OrderModule,
     BookingModule,

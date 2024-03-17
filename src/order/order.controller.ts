@@ -1,6 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from 'src/order/dtos/CreateOrder.dto';
+import { OrderItemDto } from 'src/order/dtos/OrderItem.dto';
+import { OrderModel } from 'src/order/models/order.model';
 import { OrderService } from 'src/order/order.service';
 
 @ApiTags('order')
@@ -12,10 +14,32 @@ export class OrderController {
   @ApiBody({ type: CreateOrderDto, description: 'Create a new order' })
   @ApiResponse({
     status: 201,
-    // type: Order,
+    type: OrderModel,
     description: 'Order created successfully',
   })
   async create(@Body() dto: CreateOrderDto) {
     return this.orderService.create(dto);
+  }
+
+  @Get()
+  @ApiResponse({
+    status: 200,
+    type: Array<OrderItemDto>,
+    description: 'Get all orders',
+  })
+  async getAll(): Promise<OrderItemDto[]> {
+    const orders = await this.orderService.getAll();
+    return orders.map((order) => new OrderItemDto(order));
+  }
+
+  @Get(':id')
+  @ApiParam({ name: 'id', type: 'number' })
+  @ApiResponse({
+    status: 200,
+    type: OrderItemDto,
+    description: 'Get order by ID',
+  })
+  async getOne(@Param('id') id: number): Promise<OrderItemDto> {
+    return new OrderItemDto(await this.orderService.getOne(id));
   }
 }

@@ -1,8 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
 import { BookingService } from 'src/booking/booking.service';
+import { BookingModel } from 'src/booking/models/booking.model';
 import { CreateOrderDto } from 'src/order/dtos/CreateOrder.dto';
 import { OrderBookingModel } from 'src/order/models/order-booking.model';
 import { OrderModel } from 'src/order/models/order.model';
@@ -60,5 +66,31 @@ export class OrderService {
         );
       }
     });
+  }
+
+  async getOne(id: number) {
+    const order = await this.orderRepository.findByPk(id, {
+      include: [BookingModel],
+      nest: true,
+    });
+
+    if (!order) {
+      throw new NotFoundException('No order found');
+    }
+
+    return order.get({ plain: true });
+  }
+
+  async getAll() {
+    const orders = await this.orderRepository.findAll({
+      include: [BookingModel],
+      nest: true,
+    });
+
+    if (!orders) {
+      throw new NotFoundException('No order found');
+    }
+
+    return orders.map((order) => order.get({ plain: true }));
   }
 }
