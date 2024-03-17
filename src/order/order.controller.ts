@@ -30,6 +30,15 @@ export class OrderController {
     return this.orderService.create(dto);
   }
 
+  @Put(':id/cancel')
+  @ApiParam({ name: 'id', type: 'number' })
+  @ApiResponse({
+    status: 200,
+  })
+  async cancel(@Param('id') id: number) {
+    return this.orderService.cancelOne(id);
+  }
+
   @Put(':id')
   @ApiBody({ type: UpdateOrderDto, description: 'Update order' })
   @ApiResponse({

@@ -5,7 +5,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Sequelize } from 'sequelize-typescript';
 
 import { BookingService } from 'src/booking/booking.service';
 import { BookingModel } from 'src/booking/models/booking.model';
@@ -17,7 +16,6 @@ import { OrderModel } from 'src/order/models/order.model';
 @Injectable()
 export class OrderService {
   constructor(
-    private readonly sequelize: Sequelize,
     private readonly bookingService: BookingService,
     @InjectModel(OrderModel)
     private readonly orderRepository: typeof OrderModel,
@@ -93,6 +91,27 @@ export class OrderService {
         order_id: id,
       });
     }
+  }
+
+  async cancelOne(id: number) {
+    const order = await this.getOne(id, false);
+
+    if (!order) {
+      throw new NotFoundException('No order found');
+    }
+
+    for (const booking of order.bookings) {
+      await this.bookingService.updateBooking(booking.id, {
+        booked_from: null,
+        booked_to: null,
+      });
+    }
+
+    await this.orderBookingRepository.destroy({ where: { order_id: id } });
+
+    order.cancelDate = new Date();
+
+    await order.save();
   }
 
   async getOne(id: number, isRaw = true) {

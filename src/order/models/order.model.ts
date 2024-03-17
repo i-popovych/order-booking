@@ -16,8 +16,6 @@ interface OrderCreationAttrs {
   end_date: Date;
 }
 
-//todo: add isWasCancelled field
-
 @Table({ tableName: 'orders' })
 export class OrderModel extends Model<OrderModel, OrderCreationAttrs> {
   @ApiProperty({
@@ -34,6 +32,13 @@ export class OrderModel extends Model<OrderModel, OrderCreationAttrs> {
   @ApiProperty({ example: '2024-03-20T00:00:00Z', description: 'End date' })
   @Column({ type: DataType.DATE, allowNull: false })
   end_date: Date;
+
+  @ApiProperty({
+    example: true,
+    description: "Cancel order date, if was not canceled it's null",
+  })
+  @Column({ type: DataType.DATE, defaultValue: null })
+  cancelDate: Date | null;
 
   @ApiProperty({
     example: '2024-03-20T00:00:00Z',
