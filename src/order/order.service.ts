@@ -4,15 +4,18 @@ import { Sequelize } from 'sequelize-typescript';
 
 import { BookingService } from 'src/booking/booking.service';
 import { CreateOrderDto } from 'src/order/dtos/CreateOrder.dto';
+import { OrderBookingModel } from 'src/order/models/order-booking.model';
 import { OrderModel } from 'src/order/models/order.model';
 
 @Injectable()
 export class OrderService {
   constructor(
+    private readonly sequelize: Sequelize,
     private readonly bookingService: BookingService,
     @InjectModel(OrderModel)
     private readonly orderRepository: typeof OrderModel,
-    private readonly sequelize: Sequelize,
+    @InjectModel(OrderBookingModel)
+    private readonly orderBookingRepository: typeof OrderBookingModel,
   ) {}
 
   async create(dto: CreateOrderDto) {
@@ -31,7 +34,7 @@ export class OrderService {
 
       for (const bookingId of booking_ids) {
         const isAvailable = await this.bookingService.isAvailable(
-          Number(bookingId),
+          bookingId,
           start_date,
           end_date,
         );
@@ -43,17 +46,19 @@ export class OrderService {
           );
         }
 
-        await this.bookingService.updateBooking(Number(bookingId), {
+        const booking = await this.bookingService.updateBooking(bookingId, {
           booked_from: start_date,
           booked_to: end_date,
         });
 
-        await order.$add('booking', bookingId, {
-          transaction: transactionHost,
-        });
+        await this.orderBookingRepository.create(
+          {
+            booking_id: booking.id,
+            order_id: order.id,
+          },
+          transactionHost,
+        );
       }
     });
-
-    // return this.orderRepository.create(dto);
   }
 }

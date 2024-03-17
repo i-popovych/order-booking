@@ -11,7 +11,7 @@ export class CreateOrderDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsNumber({}, { each: true })
-  readonly booking_ids: string[];
+  readonly booking_ids: number[];
 
   @ApiProperty({
     description: 'Start rent date',

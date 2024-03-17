@@ -12,7 +12,6 @@ export class DateRangeConstraint implements ValidatorConstraintInterface {
     const startDate = new Date(value);
     const endDate = new Date(args.object[args.constraints[0]]);
 
-    // Convert dates to UTC
     const startWithoutTime = Date.UTC(
       startDate.getUTCFullYear(),
       startDate.getUTCMonth(),

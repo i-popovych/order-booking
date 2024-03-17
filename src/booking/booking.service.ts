@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
 import { CreateBookingDto } from 'src/booking/dtos/CreateBooking.dto';
 import { UpdateBookingDto } from 'src/booking/dtos/UpdateBooking.dto';
 import { BookingModel } from 'src/booking/models/booking.model';
@@ -46,26 +45,16 @@ export class BookingService {
     start_date: Date,
     end_date: Date,
   ): Promise<boolean> {
-    const overlappingBooking = await this.bookingRepository.findOne({
-      where: {
-        id: id,
-        [Op.and]: [
-          {
-            [Op.or]: [
-              { booked_from: { [Op.eq]: null } },
-              { booked_from: { [Op.lt]: end_date } },
-            ],
-          },
-          {
-            [Op.or]: [
-              { booked_to: { [Op.eq]: null } },
-              { booked_to: { [Op.gt]: start_date } },
-            ],
-          },
-        ],
-      },
-    });
+    const booking = await this.bookingRepository.findByPk(id);
 
-    return !overlappingBooking; // true if no overlapping booking found
+    if (!booking) {
+      return true;
+    }
+
+    const isOverlapping =
+      (start_date <= booking.booked_to && start_date >= booking.booked_from) ||
+      (end_date >= booking.booked_from && end_date <= booking.booked_to);
+
+    return !isOverlapping;
   }
 }

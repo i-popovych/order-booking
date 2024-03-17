@@ -33,9 +33,6 @@ export class OrderModel extends Model<OrderModel, OrderCreationAttrs> {
   @Column({ type: DataType.DATE, allowNull: false })
   end_date: Date;
 
-  @BelongsToMany(() => BookingModel, () => OrderBookingModel)
-  bookings: BookingModel[];
-
   @ApiProperty({
     example: '2024-03-20T00:00:00Z',
     description: 'Created at date',
@@ -49,4 +46,7 @@ export class OrderModel extends Model<OrderModel, OrderCreationAttrs> {
   })
   @UpdatedAt
   updatedAt: Date;
+
+  @BelongsToMany(() => BookingModel, () => OrderBookingModel)
+  bookings: BookingModel[];
 }
