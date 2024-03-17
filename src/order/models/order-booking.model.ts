@@ -1,10 +1,4 @@
-import {
-  Column,
-  DataType,
-  ForeignKey,
-  Model,
-  Table,
-} from 'sequelize-typescript';
+import { Column, ForeignKey, Model, Table } from 'sequelize-typescript';
 import { BookingModel } from 'src/booking/models/booking.model';
 import { OrderModel } from 'src/order/models/order.model';
 
@@ -18,7 +12,7 @@ export class OrderBookingModel extends Model<
   OrderBookingModel,
   OrderBookingCreationAttrs
 > {
-  @Column({ type: DataType.BIGINT, autoIncrement: true, primaryKey: true })
+  @Column
   @ForeignKey(() => OrderModel)
   order_id: number;
 

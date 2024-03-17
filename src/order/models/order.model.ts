@@ -16,6 +16,8 @@ interface OrderCreationAttrs {
   end_date: Date;
 }
 
+//todo: add isWasCancelled field
+
 @Table({ tableName: 'orders' })
 export class OrderModel extends Model<OrderModel, OrderCreationAttrs> {
   @ApiProperty({

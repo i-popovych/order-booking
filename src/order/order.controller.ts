@@ -1,7 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ApiBody, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from 'src/order/dtos/CreateOrder.dto';
 import { OrderItemDto } from 'src/order/dtos/OrderItem.dto';
+import { UpdateOrderDto } from 'src/order/dtos/UpdateOrder.dto';
 import { OrderModel } from 'src/order/models/order.model';
 import { OrderService } from 'src/order/order.service';
 
@@ -19,6 +28,17 @@ export class OrderController {
   })
   async create(@Body() dto: CreateOrderDto) {
     return this.orderService.create(dto);
+  }
+
+  @Put(':id')
+  @ApiBody({ type: UpdateOrderDto, description: 'Update order' })
+  @ApiResponse({
+    status: 201,
+    type: OrderModel,
+    description: 'Order updated successfully',
+  })
+  async update(@Param('id') id: number, @Body() dto: UpdateOrderDto) {
+    return this.orderService.update(id, dto);
   }
 
   @Get()
